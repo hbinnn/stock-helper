@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">做T助手</string>
+    <string name="add_stock">添加股票</string>
+    <string name="stock_code">股票代码</string>
+    <string name="stock_name">股票名称</string>
+    <string name="target_buy_price">目标买入价</string>
+    <string name="target_sell_price">目标卖出价</string>
+    <string name="shares">持仓数量</string>
+    <string name="save">保存</string>
+    <string name="cancel">取消</string>
+    <string name="delete">删除</string>
+    <string name="expected_profit">预估收益</string>
+    <string name="current_price">当前价</string>
+    <string name="profit_rate">收益率</string>
+    <string name="no_stocks">暂无自选股，点击+添加</string>
+    <string name="price_alert_buy">买入提醒</string>
+    <string name="price_alert_sell">卖出提醒</string>
+    <string name="channel_name">价格提醒</string>
+    <string name="channel_description">股票价格达到目标时发送提醒</string>
+</resources>
