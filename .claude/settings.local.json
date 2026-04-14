@@ -41,7 +41,10 @@
       "Bash(/opt/homebrew/opt/gradle@8/bin/gradle clean:*)",
       "Bash(git init:*)",
       "Bash(git remote:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git config:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
