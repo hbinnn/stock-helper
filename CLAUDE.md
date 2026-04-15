@@ -4,7 +4,70 @@
 
 ## 项目概述
 
-**做T助手** - 一款辅助股票日内回转交易（"做T"）的应用，监控股票价格，在达到目标买卖价时提醒用户手动交易，并计算预期收益。
+**大富翁助手** - 一款辅助股票日内回转交易（"做T"）的应用，监控股票价格，在达到目标买卖价时提醒用户手动交易，并计算预期收益。
+
+> **注意**：项目重构后，"做T助手"作为"大富翁助手"的一个功能模块，后续将扩展更多功能。
+
+---
+
+## 项目结构
+
+```
+大富翁助手/
+├── app/
+│   └── src/main/
+│       ├── java/com/example/stockhelper/
+│       │   ├── MainActivity.kt           # 主Activity，含底部Tab导航
+│       │   ├── RichHelperApp.kt          # Application类
+│       │   ├── data/
+│       │   │   ├── local/
+│       │   │   │   ├── AppDatabase.kt   # Room数据库
+│       │   │   │   └── StockDao.kt     # 股票DAO
+│       │   │   ├── remote/
+│       │   │   │   ├── EastMoneyApi.kt  # 东方财富API接口
+│       │   │   │   └── NetworkModule.kt # 网络模块配置
+│       │   │   └── repository/
+│       │   │       ├── StockRepository.kt      # 仓库接口
+│       │   │       └── StockRepositoryImpl.kt  # 仓库实现
+│       │   ├── domain/model/
+│       │   │   ├── Stock.kt           # 股票实体
+│       │   │   ├── StockQuote.kt      # 行情数据
+│       │   │   └── ProfitInfo.kt      # 收益信息
+│       │   ├── ui/
+│       │   │   ├── Navigation.kt      # 导航配置（预留）
+│       │   │   ├── screens/
+│       │   │   │   ├── home/          # 首页（做T助手列表）
+│       │   │   │   ├── add/           # 添加股票
+│       │   │   │   └── detail/        # 股票详情
+│       │   │   └── theme/             # 主题配置
+│       │   └── util/
+│       │       ├── NotificationHelper.kt    # 通知助手
+│       │       ├── PriceMonitorService.kt  # 价格监控服务（待完善）
+│       │       └── BootReceiver.kt        # 开机广播接收器
+│       └── res/
+│           ├── values/
+│           │   ├── strings.xml       # 字符串资源
+│           │   └── themes.xml         # 主题配置
+│           └── ...
+│
+├── settings.gradle.kts
+├── build.gradle.kts
+└── ...
+```
+
+---
+
+## 技术栈
+
+- **平台**：Android (Kotlin)
+- **UI框架**：Jetpack Compose
+- **架构**：MVVM + 清洁架构
+- **数据库**：Room
+- **网络**：Retrofit + OkHttp + Gson
+- **最低SDK**：24 (Android 7.0)
+- **目标SDK**：34 (Android 14)
+
+---
 
 ## 环境搭建
 
@@ -19,8 +82,6 @@ export JAVA_HOME=/opt/homebrew/opt/openjdk@17
 ```
 
 ### 2. 安装Android SDK
-
-Android SDK通常随Android Studio一起安装。如果没有单独安装：
 
 ```bash
 # 下载Android command line tools
@@ -57,6 +118,8 @@ git clone git@github.com:hbinnn/stock-helper.git
 cd stock-helper
 ```
 
+---
+
 ## 构建命令
 
 ### Debug构建
@@ -83,6 +146,8 @@ export JAVA_HOME=/opt/homebrew/opt/openjdk@17
 ```bash
 ./gradlew clean
 ```
+
+---
 
 ## 模拟器运行
 
@@ -149,6 +214,8 @@ adb logcat -s StockHelper
 adb logcat -c
 ```
 
+---
+
 ## 真机调试
 
 ### 1. 手机开启开发者模式
@@ -172,53 +239,129 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 - 设置 → 隐私 → 保护 → 特殊权限 → 安装未知应用 → 开启对应应用的权限
 - 设置 → 开发者选项 → 关闭"MIUI优化"（可能需要重启）
 
-## 技术栈
+---
 
-- **平台**：Android (Kotlin)
-- **UI框架**：Jetpack Compose
-- **架构**：MVVM + 清洁架构
-- **数据库**：Room
-- **网络**：Retrofit + OkHttp
-- **最低SDK**：24 (Android 7.0)
-- **目标SDK**：34 (Android 14)
+## 导航结构
 
-## 关键架构
+### 底部Tab导航
 
-- `domain/model/` - 数据模型（Stock、StockQuote、ProfitInfo）
-- `data/local/` - Room数据库（StockDao、AppDatabase）
-- `data/remote/` - 东方财富API行情集成
-- `data/repository/` - 仓库模式实现
-- `ui/screens/` - Compose UI页面（首页、添加股票、详情）
-- `util/` - 通知助手、价格监控服务、开机广播接收器
+```
+┌─────────────────────────────────────┐
+│           大富翁助手                   │
+├─────────────────────────────────────┤
+│                                     │
+│         功能内容区                     │
+│                                     │
+├─────────────────────────────────────┤
+│  [做T助手]        [更多]            │
+└─────────────────────────────────────┘
+```
+
+- **做T助手**：嵌套NavHost，包含首页、添加股票、详情页
+- **更多**：预留扩展，后续添加更多功能模块
+
+### 页面路由
+
+| 路由 | 说明 |
+|------|------|
+| `stock_helper` | 做T助手Tab（外部Tab） |
+| `more` | 更多Tab（外部Tab） |
+| `home` | 做T助手首页 |
+| `add_stock` | 添加股票 |
+| `detail/{stockCode}` | 股票详情页 |
+
+---
+
+## 数据库结构
+
+**Stock实体类 (version 4)**：
+
+```kotlin
+@Entity(tableName = "stocks")
+data class Stock(
+    @PrimaryKey
+    val code: String,                // 股票代码
+    val name: String,                // 股票名称
+    val costPrice: Double,           // 成本价
+    val targetBuyPrice: Double,       // 目标买入价
+    val targetSellPrice: Double,      // 目标卖出价
+    val buyPriceType: String,         // PRICE=固定价格, PERCENT=百分比
+    val sellPriceType: String,       // PRICE=固定价格, PERCENT=百分比
+    val buyPercent: Double,           // 百分比时使用
+    val sellPercent: Double,         // 百分比时使用
+    val shares: Int,                 // 持仓数量（股数）
+    val market: String,               // sh=上海, sz=深圳
+    val tradeType: String,           // BUY_FIRST=先买后卖, SELL_FIRST=先卖后买
+    val tTradeType: String,          // SHARES=固定股数, PERCENT=百分比
+    val tShares: Int,               // 固定做T股数
+    val tSharesPercent: Int          // 做T比例（25=1/4, 33=1/3等）
+)
+```
+
+---
 
 ## 已实现功能
 
+### 核心功能
 1. **自选股管理** - 添加/删除股票，设置目标价
 2. **自动获取股票信息** - 输入股票代码，自动获取名称和现价
 3. **成本价设置** - 成本价默认为现价，可自行修改
 4. **目标价格设置** - 支持固定价格和百分比两种模式
 5. **实时行情监控** - 每15秒自动刷新
 6. **价格提醒** - 到达目标价时推送通知
-7. **收益计算** - 计算预期收益和收益率
+7. **收益计算** - 计算预期收益和收益率（按做T数量）
 
-## 数据库结构
+### 交易模式
+8. **交易模式选择** - 先买后卖 / 先卖后买
+   - 先买后卖：必须先达到买入价，才会提醒卖出
+   - 先卖后买：必须先达到卖出价，才会提醒买入
 
-**Stock实体类 (version 2)**：
-```kotlin
-data class Stock(
-    val code: String,           // 股票代码
-    val name: String,          // 股票名称
-    val costPrice: Double,     // 成本价
-    val targetBuyPrice: Double,  // 目标买入价
-    val targetSellPrice: Double, // 目标卖出价
-    val buyPriceType: String,    // PRICE 或 PERCENT
-    val sellPriceType: String,   // PRICE 或 PERCENT
-    val buyPercent: Double,     // 买入百分比
-    val sellPercent: Double,    // 卖出百分比
-    val shares: Int,           // 持仓数量
-    val market: String         // sh 或 sz
-)
-```
+### 做T数量设置
+9. **做T数量设置** - 支持比例和固定股数两种方式
+   - 比例：1/4仓(25%)、1/3仓(33%)、1/2仓(50%)、全仓(100%)
+   - 固定股数：用户输入具体股数
+   - 验证：先卖后买时，做T股数不能超过持仓数量
+   - 收益计算：按做T数量而非全部持仓计算
+
+---
+
+## 待实现功能
+
+### 高优先级
+1. **编辑股票功能** - 详情页支持修改目标价、做T数量、交易模式等设置
+
+### 中优先级
+2. **价格监控服务完善** - PriceMonitorService目前是空壳，需要实现真正的监控逻辑
+3. **后台刷新机制** - 完善后台保活机制
+4. **开机启动恢复** - BootReceiver启动监控服务
+
+### 低优先级/优化项
+5. **提醒状态重置** - 第二天自动重置提醒状态
+6. **更多Tab扩展** - 添加其他功能模块
+7. **声音/震动自定义** - 允许用户自定义提醒方式
+8. **历史记录** - 记录每次做T操作
+9. **数据导出/备份** - 导出/导入股票配置
+
+---
+
+## 东方财富API字段说明
+
+实时行情API：`push2.eastmoney.com/api/qt/stock/get`
+
+| 字段 | 说明 |
+|------|------|
+| f43 | 当前价格（分，需除100） |
+| f44 | 最高价（分） |
+| f45 | 最低价（分） |
+| f46 | 今开（分） |
+| f47 | 成交量 |
+| f57 | 股票代码 |
+| f58 | 股票名称 |
+| f60 | 昨收（分，需除100） |
+| f169 | 涨跌额 |
+| f170 | 涨跌幅（%，需除100） |
+
+---
 
 ## Git使用
 
@@ -242,6 +385,8 @@ git merge feature/new-feature
 git push
 ```
 
+---
+
 ## 常见问题
 
 ### Q: 模拟器启动失败？
@@ -255,3 +400,26 @@ A: 小米手机需要在设置中开启"安装未知应用"权限，并关闭"MI
 
 ### Q: 无法连接GitHub？
 A: 检查SSH密钥配置：ls -la ~/.ssh，确保有github.com相关的密钥配置
+
+### Q: 昨收价格显示为0？
+A: 检查东方财富API字段，f47是成交量，f60才是昨收
+
+---
+
+## 版本历史
+
+| 版本 | 日期 | 说明 |
+|------|------|------|
+| 1.0 | - | 初始版本 |
+| 2 | - | 添加交易模式相关字段 |
+| 3 | - | 添加提醒相关逻辑 |
+| 4 | 2026-04-16 | 添加做T数量设置（tradeType, tTradeType, tShares, tSharesPercent） |
+
+---
+
+## 开发注意事项
+
+1. **shares字段**：直接存储股数（如1000股就存1000），显示时不需乘100
+2. **提醒状态**：触发后保存在内存中，删除股票时需清理
+3. **交易模式**：影响提醒的触发逻辑，先买后卖需先达成买入价
+4. **做T数量**：预估收益按做T数量计算，非全部持仓

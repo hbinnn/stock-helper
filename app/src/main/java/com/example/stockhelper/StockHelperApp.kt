@@ -3,7 +3,7 @@ package com.example.stockhelper
 import android.app.Application
 import com.example.stockhelper.util.NotificationHelper
 
-class StockHelperApp : Application() {
+class RichHelperApp : Application() {
 
     lateinit var notificationHelper: NotificationHelper
         private set

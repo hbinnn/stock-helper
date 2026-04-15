@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "StockHelper"
+rootProject.name = "RichHelper"
 include(":app")

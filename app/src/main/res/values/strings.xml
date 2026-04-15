@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">做T助手</string>
+    <string name="app_name">大富翁助手</string>
     <string name="add_stock">添加股票</string>
     <string name="stock_code">股票代码</string>
     <string name="stock_name">股票名称</string>

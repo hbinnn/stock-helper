@@ -26,7 +26,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun StockHelperTheme(
+fun RichHelperTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
