@@ -11,5 +11,9 @@ data class DetailUiState(
     val quote: StockQuote? = null,
     val isLoading: Boolean = false,
     val expectedProfit: Double = 0.0,
-    val profitRate: Double = 0.0
+    val profitRate: Double = 0.0,
+    val tradeType: String = "BUY_FIRST",
+    val tTradeType: String = "PERCENT",
+    val tShares: Int = 0,
+    val tSharesPercent: Int = 25
 )

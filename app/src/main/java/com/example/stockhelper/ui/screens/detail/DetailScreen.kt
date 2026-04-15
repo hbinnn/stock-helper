@@ -147,7 +147,22 @@ fun DetailScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     DetailRow("股票代码", uiState.stockCode)
-                    DetailRow("持仓数量", "${uiState.shares * 100}股")
+                    DetailRow("交易模式", if (uiState.tradeType == "BUY_FIRST") "先买后卖" else "先卖后买")
+                    DetailRow("持仓数量", "${uiState.shares}股")
+                    DetailRow(
+                        "做T数量",
+                        if (uiState.tTradeType == "PERCENT") {
+                            when (uiState.tSharesPercent) {
+                                25 -> "1/4仓"
+                                33 -> "1/3仓"
+                                50 -> "1/2仓"
+                                100 -> "全仓"
+                                else -> "${uiState.tSharesPercent}%"
+                            }
+                        } else {
+                            "${uiState.tShares}股"
+                        }
+                    )
                     DetailRow(
                         "目标买入价",
                         "${String.format("%.2f", uiState.targetBuyPrice)}元",

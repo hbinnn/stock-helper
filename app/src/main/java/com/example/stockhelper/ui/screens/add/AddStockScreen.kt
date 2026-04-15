@@ -186,6 +186,129 @@ fun AddStockScreen(
                 supportingText = { Text("获取股票信息后默认为现价，可自行修改") }
             )
 
+            // 持仓数量
+            OutlinedTextField(
+                value = uiState.shares,
+                onValueChange = { viewModel.updateShares(it) },
+                label = { Text("持仓数量") },
+                placeholder = { Text("如: 1000") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                suffix = { Text("股") }
+            )
+
+            // 交易模式选择
+            Text(
+                text = "交易模式",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(
+                    onClick = { viewModel.updateTradeType("BUY_FIRST") },
+                    label = { Text("先买后卖") },
+                    selected = uiState.tradeType == "BUY_FIRST"
+                )
+                FilterChip(
+                    onClick = { viewModel.updateTradeType("SELL_FIRST") },
+                    label = { Text("先卖后买") },
+                    selected = uiState.tradeType == "SELL_FIRST"
+                )
+            }
+            Text(
+                text = if (uiState.tradeType == "BUY_FIRST")
+                    "必须先达到买入价，才会提醒卖出"
+                else
+                    "必须先达到卖出价，才会提醒买入",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
+
+            // 做T数量设置
+            Text(
+                text = "做T数量",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(
+                    onClick = { viewModel.updateTTradeType("PERCENT") },
+                    label = { Text("比例") },
+                    selected = uiState.tTradeType == "PERCENT"
+                )
+                FilterChip(
+                    onClick = { viewModel.updateTTradeType("SHARES") },
+                    label = { Text("固定股数") },
+                    selected = uiState.tTradeType == "SHARES"
+                )
+            }
+
+            if (uiState.tTradeType == "PERCENT") {
+                // 百分比选项
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        onClick = { viewModel.updateTSharesPercent("25") },
+                        label = { Text("1/4仓") },
+                        selected = uiState.tSharesPercent == "25"
+                    )
+                    FilterChip(
+                        onClick = { viewModel.updateTSharesPercent("33") },
+                        label = { Text("1/3仓") },
+                        selected = uiState.tSharesPercent == "33"
+                    )
+                    FilterChip(
+                        onClick = { viewModel.updateTSharesPercent("50") },
+                        label = { Text("1/2仓") },
+                        selected = uiState.tSharesPercent == "50"
+                    )
+                    FilterChip(
+                        onClick = { viewModel.updateTSharesPercent("100") },
+                        label = { Text("全仓") },
+                        selected = uiState.tSharesPercent == "100"
+                    )
+                }
+                Text(
+                    text = when (uiState.tSharesPercent) {
+                        "25" -> "每次做T: 1/4仓"
+                        "33" -> "每次做T: 1/3仓"
+                        "50" -> "每次做T: 1/2仓"
+                        "100" -> "每次做T: 全仓"
+                        else -> "每次做T: ${uiState.tSharesPercent}%"
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
+                )
+            } else {
+                OutlinedTextField(
+                    value = uiState.tShares,
+                    onValueChange = { viewModel.updateTShares(it) },
+                    label = { Text("做T股数") },
+                    placeholder = { Text("如: 100") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    suffix = { Text("股") },
+                    supportingText = {
+                        if (uiState.tradeType == "SELL_FIRST" && uiState.shares.isNotBlank()) {
+                            val shares = uiState.shares.toIntOrNull() ?: 0
+                            Text("不能超过持仓 ${shares}股")
+                        } else null
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             // 目标买入价设置
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -269,17 +392,6 @@ fun AddStockScreen(
                     supportingText = { Text("相对于成本价上涨百分之多少卖出") }
                 )
             }
-
-            OutlinedTextField(
-                value = uiState.shares,
-                onValueChange = { viewModel.updateShares(it) },
-                label = { Text("持仓数量") },
-                placeholder = { Text("如: 1000") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                suffix = { Text("股") }
-            )
 
             Spacer(modifier = Modifier.weight(1f))
 

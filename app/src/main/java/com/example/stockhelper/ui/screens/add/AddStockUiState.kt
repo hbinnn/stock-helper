@@ -24,6 +24,10 @@ data class AddStockUiState(
     val sellPercent: String = "",  // 百分比输入
 
     val shares: String = "",
+    val tradeType: String = "BUY_FIRST",  // BUY_FIRST=先买后卖, SELL_FIRST=先卖后买
+    val tTradeType: String = "PERCENT",    // SHARES=固定股数, PERCENT=百分比
+    val tShares: String = "",               // 固定做T股数
+    val tSharesPercent: String = "25",      // 做T比例
     val error: String? = null,
     val isSaved: Boolean = false
 )

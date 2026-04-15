@@ -44,7 +44,7 @@ class StockRepositoryImpl(
                     val high = (data.f44?.toDoubleOrNull() ?: 0.0) / 100.0
                     val low = (data.f45?.toDoubleOrNull() ?: 0.0) / 100.0
                     val open = (data.f46?.toDoubleOrNull() ?: 0.0) / 100.0
-                    val previousClose = (data.f47?.toDoubleOrNull() ?: 0.0) / 100.0
+                    val previousClose = (data.f60?.toDoubleOrNull() ?: 0.0) / 100.0
 
                     Result.success(
                         StockQuote(

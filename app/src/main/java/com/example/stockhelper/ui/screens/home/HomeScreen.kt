@@ -30,7 +30,7 @@ fun HomeScreen(
     onStockClick: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val stocksWithQuotes = viewModel.getStocksWithQuotes()
+    val stocksWithQuotes = remember(uiState.stocks, uiState.quotes) { viewModel.getStocksWithQuotes() }
 
     Scaffold(
         topBar = {
@@ -228,7 +228,7 @@ fun StockCard(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "持仓: ${stock.shares * 100}股",
+                        text = "持仓: ${stock.shares}股",
                         fontSize = 12.sp,
                         color = Color.Gray
                     )

@@ -38,7 +38,11 @@ class DetailViewModel(application: Application) : AndroidViewModel(application) 
                         stockName = stock.name,
                         shares = stock.shares,
                         targetBuyPrice = stock.targetBuyPrice,
-                        targetSellPrice = stock.targetSellPrice
+                        targetSellPrice = stock.targetSellPrice,
+                        tradeType = stock.tradeType,
+                        tTradeType = stock.tTradeType,
+                        tShares = stock.tShares,
+                        tSharesPercent = stock.tSharesPercent
                     )
                 }
                 loadQuote(stock)
@@ -50,7 +54,13 @@ class DetailViewModel(application: Application) : AndroidViewModel(application) 
     private suspend fun loadQuote(stock: com.example.stockhelper.domain.model.Stock) {
         _uiState.update { it.copy(isLoading = true) }
         repository.getStockQuote(stock).onSuccess { quote ->
-            val expectedProfit = (stock.targetSellPrice - stock.targetBuyPrice) * stock.shares * 100 * 0.999
+            // 计算做T股数
+            val tSharesValue = if (stock.tTradeType == "PERCENT") {
+                (stock.shares * stock.tSharesPercent / 100)
+            } else {
+                stock.tShares
+            }
+            val expectedProfit = (stock.targetSellPrice - stock.targetBuyPrice) * tSharesValue * 0.999
             val profitRate = if (stock.targetBuyPrice > 0) {
                 ((stock.targetSellPrice - stock.targetBuyPrice) / stock.targetBuyPrice) * 100 * 0.999
             } else 0.0

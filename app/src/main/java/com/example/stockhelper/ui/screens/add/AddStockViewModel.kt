@@ -92,6 +92,22 @@ class AddStockViewModel(application: Application) : AndroidViewModel(application
         _uiState.update { it.copy(shares = shares, error = null) }
     }
 
+    fun updateTradeType(tradeType: String) {
+        _uiState.update { it.copy(tradeType = tradeType, error = null) }
+    }
+
+    fun updateTTradeType(tTradeType: String) {
+        _uiState.update { it.copy(tTradeType = tTradeType, error = null) }
+    }
+
+    fun updateTShares(tShares: String) {
+        _uiState.update { it.copy(tShares = tShares, error = null) }
+    }
+
+    fun updateTSharesPercent(tSharesPercent: String) {
+        _uiState.update { it.copy(tSharesPercent = tSharesPercent, error = null) }
+    }
+
     fun fetchStockInfo() {
         val state = _uiState.value
         if (state.code.length < 6) {
@@ -214,6 +230,30 @@ class AddStockViewModel(application: Application) : AndroidViewModel(application
             return
         }
 
+        // 做T数量验证
+        val tSharesValue: Int
+        val tSharesPercentValue: Int
+        if (state.tTradeType == "PERCENT") {
+            tSharesPercentValue = state.tSharesPercent.toIntOrNull() ?: 0
+            if (tSharesPercentValue <= 0 || tSharesPercentValue > 100) {
+                _uiState.update { it.copy(error = "请输入有效的做T比例(1-100)") }
+                return
+            }
+            tSharesValue = 0
+        } else {
+            tSharesValue = state.tShares.toIntOrNull() ?: 0
+            if (tSharesValue <= 0) {
+                _uiState.update { it.copy(error = "请输入有效的做T股数") }
+                return
+            }
+            // 先卖后买时，卖出数量不能超过持仓
+            if (state.tradeType == "SELL_FIRST" && tSharesValue > shares) {
+                _uiState.update { it.copy(error = "做T股数不能超过持仓数量") }
+                return
+            }
+            tSharesPercentValue = 0
+        }
+
         val stock = Stock(
             code = state.code,
             name = state.name,
@@ -225,7 +265,11 @@ class AddStockViewModel(application: Application) : AndroidViewModel(application
             buyPercent = if (state.buyPriceType == "PERCENT") buyPercentValue else 0.0,
             sellPercent = if (state.sellPriceType == "PERCENT") sellPercentValue else 0.0,
             shares = shares,
-            market = state.market
+            market = state.market,
+            tradeType = state.tradeType,
+            tTradeType = state.tTradeType,
+            tShares = tSharesValue,
+            tSharesPercent = tSharesPercentValue
         )
 
         viewModelScope.launch {
