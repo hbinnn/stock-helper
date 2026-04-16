@@ -3,6 +3,7 @@ package com.example.stockhelper.ui.screens.detail
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,7 +21,8 @@ import com.example.stockhelper.ui.theme.Red
 fun DetailScreen(
     stockCode: String,
     viewModel: DetailViewModel = viewModel(),
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToEdit: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -43,6 +45,14 @@ fun DetailScreen(
                     navigationIconContentColor = Color.White
                 )
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { onNavigateToEdit(stockCode) },
+                containerColor = MaterialTheme.colorScheme.secondary
+            ) {
+                Icon(Icons.Default.Edit, contentDescription = "编辑")
+            }
         }
     ) { paddingValues ->
         Column(

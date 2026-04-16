@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.stockhelper.ui.screens.add.AddStockScreen
 import com.example.stockhelper.ui.screens.detail.DetailScreen
+import com.example.stockhelper.ui.screens.edit.EditStockScreen
 import com.example.stockhelper.ui.screens.home.HomeScreen
 
 sealed class Screen(val route: String) {
@@ -15,6 +16,9 @@ sealed class Screen(val route: String) {
     object AddStock : Screen("add_stock")
     object Detail : Screen("detail/{stockCode}") {
         fun createRoute(stockCode: String) = "detail/$stockCode"
+    }
+    object EditStock : Screen("edit_stock/{stockCode}") {
+        fun createRoute(stockCode: String) = "edit_stock/$stockCode"
     }
 }
 
@@ -45,6 +49,20 @@ fun AppNavHost(navController: NavHostController) {
         ) { backStackEntry ->
             val stockCode = backStackEntry.arguments?.getString("stockCode") ?: ""
             DetailScreen(
+                stockCode = stockCode,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEdit = { code ->
+                    navController.navigate(Screen.EditStock.createRoute(code))
+                }
+            )
+        }
+
+        composable(
+            route = Screen.EditStock.route,
+            arguments = listOf(navArgument("stockCode") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val stockCode = backStackEntry.arguments?.getString("stockCode") ?: ""
+            EditStockScreen(
                 stockCode = stockCode,
                 onNavigateBack = { navController.popBackStack() }
             )

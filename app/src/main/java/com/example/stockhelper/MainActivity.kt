@@ -31,6 +31,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.stockhelper.ui.screens.add.AddStockScreen
 import com.example.stockhelper.ui.screens.detail.DetailScreen
+import com.example.stockhelper.ui.screens.edit.EditStockScreen
 import com.example.stockhelper.ui.screens.home.HomeScreen
 import com.example.stockhelper.ui.theme.RichHelperTheme
 
@@ -157,6 +158,17 @@ fun StockHelperNavHost() {
         composable("detail/{stockCode}") { backStackEntry ->
             val stockCode = backStackEntry.arguments?.getString("stockCode") ?: ""
             DetailScreen(
+                stockCode = stockCode,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEdit = { code ->
+                    navController.navigate("edit_stock/$code")
+                }
+            )
+        }
+
+        composable("edit_stock/{stockCode}") { backStackEntry ->
+            val stockCode = backStackEntry.arguments?.getString("stockCode") ?: ""
+            EditStockScreen(
                 stockCode = stockCode,
                 onNavigateBack = { navController.popBackStack() }
             )

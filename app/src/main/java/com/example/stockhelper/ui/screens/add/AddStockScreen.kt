@@ -23,7 +23,8 @@ import com.example.stockhelper.ui.theme.Red
 @Composable
 fun AddStockScreen(
     viewModel: AddStockViewModel = viewModel(),
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    isEditMode: Boolean = false
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
@@ -37,7 +38,7 @@ fun AddStockScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("添加股票") },
+                title = { Text(if (isEditMode) "编辑股票" else "添加股票") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -83,34 +84,43 @@ fun AddStockScreen(
             }
 
             // 股票代码输入
-            OutlinedTextField(
-                value = uiState.code,
-                onValueChange = { viewModel.updateCode(it) },
-                label = { Text("股票代码") },
-                placeholder = { Text("如: 600000 或 000001") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
+            if (isEditMode) {
+                // 编辑模式：只读显示
+                Text(
+                    text = "股票代码: ${uiState.code}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            } else {
+                // 添加模式：可编辑输入
+                OutlinedTextField(
+                    value = uiState.code,
+                    onValueChange = { viewModel.updateCode(it) },
+                    label = { Text("股票代码") },
+                    placeholder = { Text("如: 600000 或 000001") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
 
-            // 获取股票信息按钮
-            Button(
-                onClick = { viewModel.fetchStockInfo() },
-                enabled = uiState.code.length >= 6 && !uiState.isLoadingInfo,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                if (uiState.isLoadingInfo) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        color = Color.White,
-                        strokeWidth = 2.dp
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("获取中...")
-                } else {
-                    Icon(Icons.Default.Search, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("获取股票信息")
+                // 获取股票信息按钮
+                Button(
+                    onClick = { viewModel.fetchStockInfo() },
+                    enabled = uiState.code.length >= 6 && !uiState.isLoadingInfo,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (uiState.isLoadingInfo) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("获取中...")
+                    } else {
+                        Icon(Icons.Default.Search, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("获取股票信息")
+                    }
                 }
             }
 
@@ -183,7 +193,13 @@ fun AddStockScreen(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 suffix = { Text("元") },
-                supportingText = { Text("获取股票信息后默认为现价，可自行修改") }
+                supportingText = {
+                    if (isEditMode) {
+                        Text("修改成本价")
+                    } else {
+                        Text("获取股票信息后默认为现价，可自行修改")
+                    }
+                }
             )
 
             // 持仓数量
@@ -411,7 +427,7 @@ fun AddStockScreen(
                         uiState.costPriceInput.isNotBlank() &&
                         uiState.shares.isNotBlank()
             ) {
-                Text("保存")
+                Text(if (isEditMode) "更新" else "保存")
             }
         }
     }

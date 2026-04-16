@@ -108,6 +108,42 @@ class AddStockViewModel(application: Application) : AndroidViewModel(application
         _uiState.update { it.copy(tSharesPercent = tSharesPercent, error = null) }
     }
 
+    /**
+     * 加载股票数据进行编辑
+     */
+    fun loadStock(code: String) {
+        viewModelScope.launch {
+            val stock = repository.getStockByCode(code)
+            if (stock != null) {
+                _uiState.update {
+                    it.copy(
+                        code = stock.code,
+                        name = stock.name,
+                        market = stock.market,
+                        costPrice = stock.costPrice,
+                        costPriceInput = String.format("%.2f", stock.costPrice),
+                        shares = stock.shares.toString(),
+                        tradeType = stock.tradeType,
+                        tTradeType = stock.tTradeType,
+                        tShares = stock.tShares.toString(),
+                        tSharesPercent = stock.tSharesPercent.toString(),
+                        // 目标价格恢复
+                        buyPriceType = stock.buyPriceType,
+                        sellPriceType = stock.sellPriceType,
+                        targetBuyPrice = if (stock.buyPriceType == "PRICE")
+                            String.format("%.2f", stock.targetBuyPrice) else "",
+                        buyPercent = if (stock.buyPriceType == "PERCENT")
+                            String.format("%.2f", stock.buyPercent) else "",
+                        targetSellPrice = if (stock.sellPriceType == "PRICE")
+                            String.format("%.2f", stock.targetSellPrice) else "",
+                        sellPercent = if (stock.sellPriceType == "PERCENT")
+                            String.format("%.2f", stock.sellPercent) else ""
+                    )
+                }
+            }
+        }
+    }
+
     fun fetchStockInfo() {
         val state = _uiState.value
         if (state.code.length < 6) {
