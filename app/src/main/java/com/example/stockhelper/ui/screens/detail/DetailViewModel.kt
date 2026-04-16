@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 class DetailViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: StockRepository
+    private val tradeRecordDao = AppDatabase.getDatabase(application).tradeRecordDao()
 
     private val _uiState = MutableStateFlow(DetailUiState())
     val uiState: StateFlow<DetailUiState> = _uiState.asStateFlow()
@@ -47,6 +48,15 @@ class DetailViewModel(application: Application) : AndroidViewModel(application) 
                 }
                 loadQuote(stock)
                 startAutoRefresh(stock)
+                loadTradeRecords(stock.code)
+            }
+        }
+    }
+
+    private fun loadTradeRecords(stockCode: String) {
+        viewModelScope.launch {
+            tradeRecordDao.getRecordsByStock(stockCode).collect { records ->
+                _uiState.update { it.copy(tradeRecords = records) }
             }
         }
     }

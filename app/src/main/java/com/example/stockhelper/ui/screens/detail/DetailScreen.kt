@@ -1,6 +1,8 @@
 package com.example.stockhelper.ui.screens.detail
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
@@ -13,8 +15,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.stockhelper.domain.model.TradeRecord
 import com.example.stockhelper.ui.theme.Green
 import com.example.stockhelper.ui.theme.Red
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -245,6 +250,95 @@ fun DetailScreen(
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 做T历史
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = "做T历史",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    if (uiState.tradeRecords.isEmpty()) {
+                        Text(
+                            text = "暂无历史记录",
+                            color = Color.Gray,
+                            fontSize = 14.sp
+                        )
+                    } else {
+                        uiState.tradeRecords.take(5).forEach { record ->
+                            TradeRecordItem(record = record)
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TradeRecordItem(record: TradeRecord) {
+    val dateFormat = SimpleDateFormat("MM-dd HH:mm", Locale.getDefault())
+    val dateStr = dateFormat.format(Date(record.triggeredAt))
+    val isBuy = record.recordType == "BUY_ALERT"
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AssistChip(
+                onClick = { },
+                label = { Text(if (isBuy) "买入" else "卖出", fontSize = 12.sp) },
+                colors = AssistChipDefaults.assistChipColors(
+                    containerColor = if (isBuy) Green.copy(alpha = 0.2f) else Red.copy(alpha = 0.2f)
+                ),
+                modifier = Modifier.height(24.dp)
+            )
+            Text(
+                text = dateStr,
+                fontSize = 12.sp,
+                color = Color.Gray
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "触发: ${String.format("%.2f", record.currentPrice)}元",
+                fontSize = 14.sp
+            )
+            Text(
+                text = "目标: ${String.format("%.2f", record.targetPrice)}元",
+                fontSize = 14.sp,
+                color = Color.Gray
+            )
+            Text(
+                text = "${record.tShares}股",
+                fontSize = 14.sp
+            )
+        }
+        if (record.isHandled) {
+            Text(
+                text = "✓ 已处理",
+                fontSize = 12.sp,
+                color = Green
+            )
         }
     }
 }

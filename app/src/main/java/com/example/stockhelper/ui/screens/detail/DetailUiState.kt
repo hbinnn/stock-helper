@@ -1,6 +1,7 @@
 package com.example.stockhelper.ui.screens.detail
 
 import com.example.stockhelper.domain.model.StockQuote
+import com.example.stockhelper.domain.model.TradeRecord
 
 data class DetailUiState(
     val stockCode: String = "",
@@ -15,5 +16,6 @@ data class DetailUiState(
     val tradeType: String = "BUY_FIRST",
     val tTradeType: String = "PERCENT",
     val tShares: Int = 0,
-    val tSharesPercent: Int = 25
+    val tSharesPercent: Int = 25,
+    val tradeRecords: List<TradeRecord> = emptyList()
 )
