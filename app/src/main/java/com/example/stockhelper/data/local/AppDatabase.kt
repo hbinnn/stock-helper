@@ -4,11 +4,13 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.stockhelper.domain.model.AlertState
 import com.example.stockhelper.domain.model.Stock
 
-@Database(entities = [Stock::class], version = 4, exportSchema = false)
+@Database(entities = [Stock::class, AlertState::class], version = 5, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun stockDao(): StockDao
+    abstract fun alertStateDao(): AlertStateDao
 
     companion object {
         @Volatile

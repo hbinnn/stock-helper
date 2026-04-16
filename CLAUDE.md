@@ -32,7 +32,8 @@
 │       │   ├── domain/model/
 │       │   │   ├── Stock.kt           # 股票实体
 │       │   │   ├── StockQuote.kt      # 行情数据
-│       │   │   └── ProfitInfo.kt      # 收益信息
+│       │   │   ├── ProfitInfo.kt      # 收益信息
+│       │   │   └── AlertState.kt      # 提醒状态实体
 │       │   ├── ui/
 │       │   │   ├── Navigation.kt      # 导航配置
 │       │   │   ├── screens/
@@ -43,8 +44,10 @@
 │       │   │   └── theme/             # 主题配置
 │       │   └── util/
 │       │       ├── NotificationHelper.kt    # 通知助手
-│       │       ├── PriceMonitorService.kt  # 价格监控服务（待完善）
-│       │       └── BootReceiver.kt        # 开机广播接收器
+│       │       ├── PriceMonitorService.kt  # 价格监控服务（Foreground Service）
+│       │       ├── BootReceiver.kt        # 开机广播接收器
+│       │       ├── ServiceManager.kt       # 服务启动管理
+│       │       └── AlertStateResetWorker.kt # 提醒状态重置Worker
 │       └── res/
 │           ├── values/
 │           │   ├── strings.xml       # 字符串资源
@@ -276,7 +279,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 
 ## 数据库结构
 
-**Stock实体类 (version 4)**：
+**Stock实体类 (version 5)**：
 
 ```kotlin
 @Entity(tableName = "stocks")
@@ -297,6 +300,21 @@ data class Stock(
     val tTradeType: String,          // SHARES=固定股数, PERCENT=百分比
     val tShares: Int,               // 固定做T股数
     val tSharesPercent: Int          // 做T比例（25=1/4, 33=1/3等）
+)
+```
+
+**AlertState实体类 (version 5)**：
+
+```kotlin
+@Entity(tableName = "alert_states")
+data class AlertState(
+    @PrimaryKey
+    val stockCode: String,              // 股票代码
+    val buyAlertSent: Boolean = false,  // 买入提醒是否已发送
+    val sellAlertSent: Boolean = false, // 卖出提醒是否已发送
+    val firstConditionReached: Boolean = false,  // 第一步条件是否达成
+    val firstConditionReachedAt: Long? = null,   // 第一步达成时间
+    val lastUpdated: Long = System.currentTimeMillis()
 )
 ```
 
@@ -336,21 +354,16 @@ data class Stock(
 ## 待实现功能
 
 ### 中优先级
-1. **价格监控服务完善** - PriceMonitorService目前是空壳，需要实现真正的监控逻辑
-2. **后台刷新机制** - 完善后台保活机制
-3. **开机启动恢复** - BootReceiver启动监控服务
+（已实现）价格监控服务完善 - Foreground Service 后台监控
+（已实现）后台刷新机制 - 15秒定时刷新
+（已实现）开机启动恢复 - BootReceiver 自动启动服务
 
 ### 低优先级/优化项
-2. **价格监控服务完善** - PriceMonitorService目前是空壳，需要实现真正的监控逻辑
-3. **后台刷新机制** - 完善后台保活机制
-4. **开机启动恢复** - BootReceiver启动监控服务
-
-### 低优先级/优化项
-4. **提醒状态重置** - 第二天自动重置提醒状态
-5. **更多Tab扩展** - 添加其他功能模块
-6. **声音/震动自定义** - 允许用户自定义提醒方式
-7. **历史记录** - 记录每次做T操作
-8. **数据导出/备份** - 导出/导入股票配置
+1. **提醒状态重置** - 第二天自动重置提醒状态（每天9点重置）
+2. **更多Tab扩展** - 添加其他功能模块
+3. **声音/震动自定义** - 允许用户自定义提醒方式
+4. **历史记录** - 记录每次做T操作
+5. **数据导出/备份** - 导出/导入股票配置
 
 ---
 
@@ -425,12 +438,16 @@ A: 检查东方财富API字段，f47是成交量，f60才是昨收
 | 3 | - | 添加提醒相关逻辑 |
 | 4 | 2026-04-16 | 添加做T数量设置（tradeType, tTradeType, tShares, tSharesPercent） |
 | 5 | 2026-04-16 | 添加编辑股票功能，支持在详情页修改股票设置 |
+| 6 | 2026-04-16 | 完善价格监控服务：Foreground Service后台监控、提醒状态持久化、开机自启、每日重置 |
 
 ---
 
 ## 开发注意事项
 
 1. **shares字段**：直接存储股数（如1000股就存1000），显示时不需乘100
-2. **提醒状态**：触发后保存在内存中，删除股票时需清理
+2. **提醒状态**：触发后保存在 AlertState 表中，删除股票时自动清理
 3. **交易模式**：影响提醒的触发逻辑，先买后卖需先达成买入价
 4. **做T数量**：预估收益按做T数量计算，非全部持仓
+5. **后台监控**：PriceMonitorService 使用 Foreground Service，App退后台后继续监控
+6. **开机自启**：BootReceiver 在设备启动后自动启动 PriceMonitorService
+7. **每日重置**：WorkManager 每天9点自动重置所有提醒状态
