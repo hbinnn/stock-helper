@@ -52,6 +52,8 @@
 │           ├── values/
 │           │   ├── strings.xml       # 字符串资源
 │           │   └── themes.xml         # 主题配置
+│           └── xml/
+│               └── network_security_config.xml  # 网络安全配置
 │           └── ...
 │
 ├── settings.gradle.kts
@@ -384,6 +386,17 @@ data class AlertState(
 | f169 | 涨跌额 |
 | f170 | 涨跌幅（%，需除100） |
 
+## 腾讯财经API
+
+备用行情API：`http://qt.gtimg.cn/q=sh600519`
+
+返回格式：`v_sh600519="1~名称~代码~现价~昨收~今开~成交量~...~最高~最低~...~涨跌额~涨跌幅";`
+
+使用说明：
+- 优先使用东方财富API，失败时自动切换到腾讯财经API
+- AndroidManifest需要配置networkSecurityConfig允许HTTP明文流量
+- 腾讯API返回数据末尾有分号，正则表达式需注意
+
 ---
 
 ## Git使用
@@ -439,6 +452,7 @@ A: 检查东方财富API字段，f47是成交量，f60才是昨收
 | 4 | 2026-04-16 | 添加做T数量设置（tradeType, tTradeType, tShares, tSharesPercent） |
 | 5 | 2026-04-16 | 添加编辑股票功能，支持在详情页修改股票设置 |
 | 6 | 2026-04-16 | 完善价格监控服务：Foreground Service后台监控、提醒状态持久化、开机自启、每日重置 |
+| 7 | 2026-04-16 | 添加腾讯财经API作为备用，双API保障更稳定 |
 
 ---
 

@@ -7,13 +7,13 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object NetworkModule {
-    private const val BASE_URL = "https://push2.eastmoney.com/"
+    private const val EASTMONEY_BASE_URL = "https://push2.eastmoney.com/"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
-    private val okHttpClient = OkHttpClient.Builder()
+    private val eastMoneyOkHttpClient = OkHttpClient.Builder()
         .addInterceptor(loggingInterceptor)
         .addInterceptor { chain ->
             val request = chain.request().newBuilder()
@@ -26,11 +26,25 @@ object NetworkModule {
         .readTimeout(30, TimeUnit.SECONDS)
         .build()
 
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
-        .client(okHttpClient)
+    private val tencentHttpClientInternal = OkHttpClient.Builder()
+        .addInterceptor(loggingInterceptor)
+        .addInterceptor { chain ->
+            val request = chain.request().newBuilder()
+                .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+                .addHeader("Referer", "https://finance.qq.com/")
+                .build()
+            chain.proceed(request)
+        }
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .build()
+
+    private val eastMoneyRetrofit = Retrofit.Builder()
+        .baseUrl(EASTMONEY_BASE_URL)
+        .client(eastMoneyOkHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    val eastMoneyApi: EastMoneyApi = retrofit.create(EastMoneyApi::class.java)
+    val eastMoneyApi: EastMoneyApi = eastMoneyRetrofit.create(EastMoneyApi::class.java)
+    val tencentHttpClient: OkHttpClient = tencentHttpClientInternal
 }
