@@ -44,7 +44,26 @@
       "Bash(git add:*)",
       "Bash(git config:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(./gradlew assembleDebug)",
+      "Bash(/opt/homebrew/opt/gradle@8/bin/gradle assembleDebug)",
+      "Bash(adb devices:*)",
+      "Bash($ANDROID_HOME/platform-tools/adb devices:*)",
+      "Bash($ANDROID_HOME/platform-tools/adb install:*)",
+      "Bash($ANDROID_HOME/platform-tools/adb shell:*)",
+      "Bash(curl -s \"https://push2.eastmoney.com/api/qt/stock/get?secid=0.000001&fields=f43,f44,f45,f46,f47,f57,f58,f107,f108,f169,f170\" -H \"User-Agent: Mozilla/5.0\" -H \"Referer: https://finance.eastmoney.com/\")",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s \"https://push2.eastmoney.com/api/qt/stock/get?secid=0.000001&fields=f43,f44,f45,f46,f47,f57,f58,f107,f108,f169,f170\" -H 'User-Agent: Mozilla/5.0' -H 'Referer: https://finance.eastmoney.com/')",
+      "Bash(curl -s \"https://push2.eastmoney.com/api/qt/stock/get?secid=1.600519&fields=f43,f44,f45,f46,f47,f57,f58,f107,f108,f169,f170,f171,f172\" -H \"User-Agent: Mozilla/5.0\" -H \"Referer: https://finance.eastmoney.com/\")",
+      "Bash(curl -s \"https://push2.eastmoney.com/api/qt/stock/get?secid=0.000001&fields=f43,f44,f45,f46,f47,f48,f57,f58,f107,f108,f169,f170,f171,f172,f173\" -H \"User-Agent: Mozilla/5.0\" -H \"Referer: https://finance.eastmoney.com/\")",
+      "Bash(curl -s \"https://push2.eastmoney.com/api/qt/stock/get?secid=0.000001&ut=fa5fd1943c7b386f172d6893dbfba10b&fields=f43,f44,f45,f46,f47,f48,f57,f58,f60,f61,f107,f108,f116,f117,f169,f170,f171,f172,f173,f177\" -H \"User-Agent: Mozilla/5.0\" -H \"Referer: https://finance.eastmoney.com/\")",
+      "Bash(curl -s \"https://push2.eastmoney.com/api/qt/stock/get?secid=1.600519&fields=f43,f44,f45,f46,f47,f48,f57,f58,f60,f107,f108,f169,f170\" -H \"User-Agent: Mozilla/5.0\" -H \"Referer: https://finance.eastmoney.com/\")",
+      "Bash(keytool:*)",
+      "Bash(/opt/homebrew/opt/gradle@8/bin/gradle assembleRelease)",
+      "Bash(~/Library/Android/sdk/platform-tools/adb devices:*)",
+      "Bash(curl -s \"https://push2.eastmoney.com/api/qt/stock/get?secid=1.600519&fields=f43,f57,f58,f60,f169,f170\")",
+      "Bash(curl -s http://qt.gtimg.cn/q=sh600519)",
+      "Bash(curl -s http://hq.sinajs.cn/list=sh600519)"
     ]
   }
 }

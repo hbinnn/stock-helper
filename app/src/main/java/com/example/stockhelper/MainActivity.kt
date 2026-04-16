@@ -32,6 +32,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.stockhelper.ui.screens.add.AddStockScreen
 import com.example.stockhelper.ui.screens.detail.DetailScreen
 import com.example.stockhelper.ui.screens.edit.EditStockScreen
+import com.example.stockhelper.ui.screens.history.HistoryScreen
 import com.example.stockhelper.ui.screens.home.HomeScreen
 import com.example.stockhelper.ui.theme.RichHelperTheme
 
@@ -178,6 +179,29 @@ fun StockHelperNavHost() {
 
 @Composable
 fun MoreScreen() {
+    val navController = rememberNavController()
+
+    NavHost(
+        navController = navController,
+        startDestination = "more_home"
+    ) {
+        composable("more_home") {
+            MoreHomeScreen(
+                onNavigateToHistory = { navController.navigate("history") }
+            )
+        }
+        composable("history") {
+            HistoryScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+    }
+}
+
+@Composable
+fun MoreHomeScreen(
+    onNavigateToHistory: () -> Unit
+) {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -192,11 +216,10 @@ fun MoreScreen() {
                 style = MaterialTheme.typography.headlineMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "即将推出...",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
-            )
+
+            Button(onClick = onNavigateToHistory) {
+                Text("历史记录")
+            }
         }
     }
 }

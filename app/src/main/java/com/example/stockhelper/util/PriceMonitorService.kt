@@ -18,6 +18,7 @@ import com.example.stockhelper.data.repository.StockRepositoryImpl
 import com.example.stockhelper.domain.model.AlertState
 import com.example.stockhelper.domain.model.Stock
 import com.example.stockhelper.domain.model.StockQuote
+import com.example.stockhelper.domain.model.TradeRecord
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -126,6 +127,18 @@ class PriceMonitorService : Service() {
                     firstConditionReachedAt = System.currentTimeMillis()
                 )
                 database.alertStateDao().insertOrUpdate(alertState)
+                // 记录历史
+                database.tradeRecordDao().insert(
+                    TradeRecord(
+                        stockCode = stock.code,
+                        stockName = stock.name,
+                        recordType = "BUY_ALERT",
+                        currentPrice = currentPrice,
+                        targetPrice = stock.targetBuyPrice,
+                        tradeType = stock.tradeType,
+                        tShares = tShares
+                    )
+                )
                 notificationHelper.sendPriceAlert(
                     stockCode = stock.code,
                     stockName = stock.name,
@@ -137,6 +150,18 @@ class PriceMonitorService : Service() {
             if (sellReached && alertState.firstConditionReached && !alertState.sellAlertSent) {
                 alertState = alertState.copy(sellAlertSent = true)
                 database.alertStateDao().insertOrUpdate(alertState)
+                // 记录历史
+                database.tradeRecordDao().insert(
+                    TradeRecord(
+                        stockCode = stock.code,
+                        stockName = stock.name,
+                        recordType = "SELL_ALERT",
+                        currentPrice = currentPrice,
+                        targetPrice = stock.targetSellPrice,
+                        tradeType = stock.tradeType,
+                        tShares = tShares
+                    )
+                )
                 val expectedProfit = (stock.targetSellPrice - stock.targetBuyPrice) * tShares * 0.999
                 notificationHelper.sendPriceAlert(
                     stockCode = stock.code,
@@ -153,6 +178,18 @@ class PriceMonitorService : Service() {
                     firstConditionReachedAt = System.currentTimeMillis()
                 )
                 database.alertStateDao().insertOrUpdate(alertState)
+                // 记录历史
+                database.tradeRecordDao().insert(
+                    TradeRecord(
+                        stockCode = stock.code,
+                        stockName = stock.name,
+                        recordType = "SELL_ALERT",
+                        currentPrice = currentPrice,
+                        targetPrice = stock.targetSellPrice,
+                        tradeType = stock.tradeType,
+                        tShares = tShares
+                    )
+                )
                 val expectedProfit = (stock.targetSellPrice - stock.targetBuyPrice) * tShares * 0.999
                 notificationHelper.sendPriceAlert(
                     stockCode = stock.code,
@@ -165,6 +202,18 @@ class PriceMonitorService : Service() {
             if (buyReached && alertState.firstConditionReached && !alertState.buyAlertSent) {
                 alertState = alertState.copy(buyAlertSent = true)
                 database.alertStateDao().insertOrUpdate(alertState)
+                // 记录历史
+                database.tradeRecordDao().insert(
+                    TradeRecord(
+                        stockCode = stock.code,
+                        stockName = stock.name,
+                        recordType = "BUY_ALERT",
+                        currentPrice = currentPrice,
+                        targetPrice = stock.targetBuyPrice,
+                        tradeType = stock.tradeType,
+                        tShares = tShares
+                    )
+                )
                 notificationHelper.sendPriceAlert(
                     stockCode = stock.code,
                     stockName = stock.name,

@@ -6,11 +6,13 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.stockhelper.domain.model.AlertState
 import com.example.stockhelper.domain.model.Stock
+import com.example.stockhelper.domain.model.TradeRecord
 
-@Database(entities = [Stock::class, AlertState::class], version = 5, exportSchema = false)
+@Database(entities = [Stock::class, AlertState::class, TradeRecord::class], version = 6, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun stockDao(): StockDao
     abstract fun alertStateDao(): AlertStateDao
+    abstract fun tradeRecordDao(): TradeRecordDao
 
     companion object {
         @Volatile

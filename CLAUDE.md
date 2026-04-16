@@ -40,7 +40,8 @@
 │       │   │   │   ├── home/          # 首页（做T助手列表）
 │       │   │   │   ├── add/           # 添加股票
 │       │   │   │   ├── edit/          # 编辑股票
-│       │   │   │   └── detail/        # 股票详情
+│       │   │   │   ├── detail/        # 股票详情
+│       │   │   │   └── history/       # 历史记录
 │       │   │   └── theme/             # 主题配置
 │       │   └── util/
 │       │       ├── NotificationHelper.kt    # 通知助手
@@ -320,6 +321,25 @@ data class AlertState(
 )
 ```
 
+**TradeRecord实体类 (version 6)**：
+
+```kotlin
+@Entity(tableName = "trade_records")
+data class TradeRecord(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val stockCode: String,
+    val stockName: String,
+    val recordType: String,        // BUY_ALERT / SELL_ALERT
+    val currentPrice: Double,       // 触发时价格
+    val targetPrice: Double,        // 目标价格
+    val tradeType: String,         // BUY_FIRST / SELL_FIRST
+    val tShares: Int,              // 做T股数
+    val triggeredAt: Long = System.currentTimeMillis(),
+    val isHandled: Boolean = false // 用户是否已处理
+)
+```
+
 ---
 
 ## 已实现功能
@@ -351,6 +371,13 @@ data class AlertState(
     - 加载现有数据填充表单
     - 支持修改成本价、目标价、交易模式、做T数量等
 
+### 历史记录
+11. **历史记录功能** - 记录每次提醒操作
+    - 触发提醒时自动保存到数据库
+    - 支持按类型筛选（买入提醒/卖出提醒）
+    - 支持标记已处理、删除记录
+    - 入口：更多Tab → 历史记录
+
 ---
 
 ## 待实现功能
@@ -364,8 +391,7 @@ data class AlertState(
 1. **提醒状态重置** - 第二天自动重置提醒状态（每天9点重置）
 2. **更多Tab扩展** - 添加其他功能模块
 3. **声音/震动自定义** - 允许用户自定义提醒方式
-4. **历史记录** - 记录每次做T操作
-5. **数据导出/备份** - 导出/导入股票配置
+4. **数据导出/备份** - 导出/导入股票配置
 
 ---
 
@@ -453,6 +479,7 @@ A: 检查东方财富API字段，f47是成交量，f60才是昨收
 | 5 | 2026-04-16 | 添加编辑股票功能，支持在详情页修改股票设置 |
 | 6 | 2026-04-16 | 完善价格监控服务：Foreground Service后台监控、提醒状态持久化、开机自启、每日重置 |
 | 7 | 2026-04-16 | 添加腾讯财经API作为备用，双API保障更稳定 |
+| 8 | 2026-04-16 | 添加历史记录功能，记录每次提醒操作 |
 
 ---
 
