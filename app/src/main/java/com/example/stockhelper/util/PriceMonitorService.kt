@@ -26,6 +26,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 class PriceMonitorService : Service() {
 
@@ -70,8 +71,119 @@ class PriceMonitorService : Service() {
 
         refreshJob = serviceScope.launch {
             while (isRunning) {
-                loadStocksAndCheckAlerts()
-                delay(15000) // 15 seconds
+                if (isMarketOpen()) {
+                    loadStocksAndCheckAlerts()
+                    delay(15000) // 15 seconds during market hours
+                } else {
+                    // 非交易时间，延迟到下次开盘时间
+                    val delayMs = getMillisecondsUntilNextMarketOpen()
+                    delay(delayMs)
+                }
+            }
+        }
+    }
+
+    private fun isMarketOpen(): Boolean {
+        val calendar = Calendar.getInstance()
+        val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute = calendar.get(Calendar.MINUTE)
+
+        // 周六周日休市
+        if (dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY) {
+            return false
+        }
+
+        // A股交易时间：上午 9:30-11:30，下午 13:00-15:00
+        val currentTime = hour * 60 + minute
+
+        // 上午：9:30-11:30
+        val morningStart = 9 * 60 + 30  // 570
+        val morningEnd = 11 * 60 + 30   // 690
+
+        // 下午：13:00-15:00
+        val afternoonStart = 13 * 60     // 780
+        val afternoonEnd = 15 * 60       // 900
+
+        return (currentTime in morningStart..morningEnd) || (currentTime in afternoonStart..afternoonEnd)
+    }
+
+    private fun getMillisecondsUntilNextMarketOpen(): Long {
+        val calendar = Calendar.getInstance()
+        val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute = calendar.get(Calendar.MINUTE)
+        val currentTime = hour * 60 + minute
+
+        // 计算毫秒到下一个开盘时间
+        // 上午9:30
+        val morningStart = 9 * 60 + 30  // 570
+        // 下午13:00
+        val afternoonStart = 13 * 60     // 780
+
+        return when {
+            // 收盘后到下一个工作日的上午开盘
+            currentTime > 900 -> {
+                // 今天已经收盘，计算到明天9:30
+                val tomorrow = Calendar.getInstance().apply {
+                    add(Calendar.DAY_OF_YEAR, 1)
+                    set(Calendar.HOUR_OF_DAY, 9)
+                    set(Calendar.MINUTE, 30)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                // 如果是周五，跳到周一
+                if (dayOfWeek == Calendar.FRIDAY) {
+                    tomorrow.add(Calendar.DAY_OF_YEAR, 2)
+                } else if (dayOfWeek == Calendar.SATURDAY) {
+                    tomorrow.add(Calendar.DAY_OF_YEAR, 1)
+                }
+                tomorrow.timeInMillis - calendar.timeInMillis
+            }
+            // 11:30-13:00 午间休市
+            currentTime in 691..779 -> {
+                val openTime = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, 13)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                openTime.timeInMillis - calendar.timeInMillis
+            }
+            // 9:30之前
+            currentTime < 570 -> {
+                val openTime = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, 9)
+                    set(Calendar.MINUTE, 30)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                openTime.timeInMillis - calendar.timeInMillis
+            }
+            // 周末
+            dayOfWeek == Calendar.SATURDAY -> {
+                val monday = Calendar.getInstance().apply {
+                    add(Calendar.DAY_OF_YEAR, 2)
+                    set(Calendar.HOUR_OF_DAY, 9)
+                    set(Calendar.MINUTE, 30)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                monday.timeInMillis - calendar.timeInMillis
+            }
+            dayOfWeek == Calendar.SUNDAY -> {
+                val monday = Calendar.getInstance().apply {
+                    add(Calendar.DAY_OF_YEAR, 1)
+                    set(Calendar.HOUR_OF_DAY, 9)
+                    set(Calendar.MINUTE, 30)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                monday.timeInMillis - calendar.timeInMillis
+            }
+            else -> {
+                // 默认等待1小时
+                60 * 60 * 1000L
             }
         }
     }
