@@ -60,56 +60,160 @@ fun DetailScreen(
             }
         }
     ) { paddingValues ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 当前行情
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
-                    Text(
-                        text = "当前行情",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = "当前行情",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                    if (uiState.quote != null) {
-                        val quote = uiState.quote!!
+                        if (uiState.quote != null) {
+                            val quote = uiState.quote!!
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Column {
-                                Text(
-                                    text = String.format("%.2f", quote.currentPrice),
-                                    fontSize = 32.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (quote.changePercent >= 0) Red else Green
-                                )
-                                Text(
-                                    text = "${if (quote.changePercent >= 0) "+" else ""}${String.format("%.2f", quote.changePercent)}%",
-                                    fontSize = 16.sp,
-                                    color = if (quote.changePercent >= 0) Red else Green
-                                )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column {
+                                    Text(
+                                        text = String.format("%.2f", quote.currentPrice),
+                                        fontSize = 32.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (quote.changePercent >= 0) Red else Green
+                                    )
+                                    Text(
+                                        text = "${if (quote.changePercent >= 0) "+" else ""}${String.format("%.2f", quote.changePercent)}%",
+                                        fontSize = 16.sp,
+                                        color = if (quote.changePercent >= 0) Red else Green
+                                    )
+                                }
+
+                                Column(horizontalAlignment = Alignment.End) {
+                                    Text(text = "今开: ${String.format("%.2f", quote.open)}", fontSize = 14.sp)
+                                    Text(text = "昨收: ${String.format("%.2f", quote.previousClose)}", fontSize = 14.sp)
+                                }
                             }
 
-                            Column(horizontalAlignment = Alignment.End) {
-                                Text(text = "今开: ${String.format("%.2f", quote.open)}", fontSize = 14.sp)
-                                Text(text = "昨收: ${String.format("%.2f", quote.previousClose)}", fontSize = 14.sp)
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column {
+                                    Text(text = "最高", fontSize = 12.sp, color = Color.Gray)
+                                    Text(
+                                        text = String.format("%.2f", quote.high),
+                                        fontSize = 16.sp,
+                                        color = Red
+                                    )
+                                }
+                                Column {
+                                    Text(text = "最低", fontSize = 12.sp, color = Color.Gray)
+                                    Text(
+                                        text = String.format("%.2f", quote.low),
+                                        fontSize = 16.sp,
+                                        color = Green
+                                    )
+                                }
                             }
+                        } else {
+                            Text(
+                                text = if (uiState.isLoading) "加载中..." else "无法获取行情",
+                                color = Color.Gray
+                            )
                         }
+                    }
+                }
+            }
 
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = "交易设置",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        DetailRow("股票代码", uiState.stockCode)
+                        DetailRow("交易模式", if (uiState.tradeType == "BUY_FIRST") "先买后卖" else "先卖后买")
+                        DetailRow("持仓数量", "${uiState.shares}股")
+                        DetailRow(
+                            "做T数量",
+                            if (uiState.tTradeType == "PERCENT") {
+                                when (uiState.tSharesPercent) {
+                                    25 -> "1/4仓"
+                                    33 -> "1/3仓"
+                                    50 -> "1/2仓"
+                                    100 -> "全仓"
+                                    else -> "${uiState.tSharesPercent}%"
+                                }
+                            } else {
+                                "${uiState.tShares}股"
+                            }
+                        )
+                        DetailRow(
+                            "目标买入价",
+                            "${String.format("%.2f", uiState.targetBuyPrice)}元",
+                            uiState.quote?.let {
+                                if (it.currentPrice <= uiState.targetBuyPrice) "✓ 已达" else null
+                            }
+                        )
+                        DetailRow(
+                            "目标卖出价",
+                            "${String.format("%.2f", uiState.targetSellPrice)}元",
+                            uiState.quote?.let {
+                                if (it.currentPrice >= uiState.targetSellPrice) "✓ 已达" else null
+                            }
+                        )
+                    }
+                }
+            }
+
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = "预估收益",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Row(
@@ -117,169 +221,64 @@ fun DetailScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Column {
-                                Text(text = "最高", fontSize = 12.sp, color = Color.Gray)
+                                Text(text = "预估收益金额", fontSize = 14.sp)
                                 Text(
-                                    text = String.format("%.2f", quote.high),
-                                    fontSize = 16.sp,
-                                    color = Red
+                                    text = "${String.format("%.2f", uiState.expectedProfit)}元",
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (uiState.expectedProfit >= 0) Red else Green
                                 )
                             }
-                            Column {
-                                Text(text = "最低", fontSize = 12.sp, color = Color.Gray)
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(text = "收益率", fontSize = 14.sp)
                                 Text(
-                                    text = String.format("%.2f", quote.low),
-                                    fontSize = 16.sp,
-                                    color = Green
+                                    text = "${String.format("%.2f", uiState.profitRate)}%",
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (uiState.profitRate >= 0) Red else Green
                                 )
                             }
                         }
-                    } else {
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
                         Text(
-                            text = if (uiState.isLoading) "加载中..." else "无法获取行情",
+                            text = "手续费按0.1%计算",
+                            fontSize = 12.sp,
                             color = Color.Gray
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // 交易设置
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
-                    Text(
-                        text = "交易设置",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    DetailRow("股票代码", uiState.stockCode)
-                    DetailRow("交易模式", if (uiState.tradeType == "BUY_FIRST") "先买后卖" else "先卖后买")
-                    DetailRow("持仓数量", "${uiState.shares}股")
-                    DetailRow(
-                        "做T数量",
-                        if (uiState.tTradeType == "PERCENT") {
-                            when (uiState.tSharesPercent) {
-                                25 -> "1/4仓"
-                                33 -> "1/3仓"
-                                50 -> "1/2仓"
-                                100 -> "全仓"
-                                else -> "${uiState.tSharesPercent}%"
-                            }
-                        } else {
-                            "${uiState.tShares}股"
-                        }
-                    )
-                    DetailRow(
-                        "目标买入价",
-                        "${String.format("%.2f", uiState.targetBuyPrice)}元",
-                        uiState.quote?.let {
-                            if (it.currentPrice <= uiState.targetBuyPrice) "✓ 已达" else null
-                        }
-                    )
-                    DetailRow(
-                        "目标卖出价",
-                        "${String.format("%.2f", uiState.targetSellPrice)}元",
-                        uiState.quote?.let {
-                            if (it.currentPrice >= uiState.targetSellPrice) "✓ 已达" else null
-                        }
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // 收益计算
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = "预估收益",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
                     ) {
-                        Column {
-                            Text(text = "预估收益金额", fontSize = 14.sp)
-                            Text(
-                                text = "${String.format("%.2f", uiState.expectedProfit)}元",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (uiState.expectedProfit >= 0) Red else Green
-                            )
-                        }
-                        Column(horizontalAlignment = Alignment.End) {
-                            Text(text = "收益率", fontSize = 14.sp)
-                            Text(
-                                text = "${String.format("%.2f", uiState.profitRate)}%",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (uiState.profitRate >= 0) Red else Green
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = "手续费按0.1%计算",
-                        fontSize = 12.sp,
-                        color = Color.Gray
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // 做T历史
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = "做T历史",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    if (uiState.tradeRecords.isEmpty()) {
                         Text(
-                            text = "暂无历史记录",
-                            color = Color.Gray,
-                            fontSize = 14.sp
+                            text = "做T历史",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
                         )
-                    } else {
-                        uiState.tradeRecords.take(5).forEach { record ->
-                            TradeRecordItem(record = record)
-                            Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        if (uiState.tradeRecords.isEmpty()) {
+                            Text(
+                                text = "暂无历史记录",
+                                color = Color.Gray,
+                                fontSize = 14.sp
+                            )
+                        } else {
+                            uiState.tradeRecords.take(5).forEach { record ->
+                                TradeRecordItem(record = record)
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
                         }
                     }
                 }
